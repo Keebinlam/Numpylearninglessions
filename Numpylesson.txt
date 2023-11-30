@@ -22,3 +22,32 @@ Application of Numpy
 - backend (pandas, connect 4, digital photography)
 - Machine Learning
 
+How to get Numpy dimensions?
+variable.ndim
+example: a = [[1,2,3,4],[5,6,7,8]]
+a.ndim
+=2
+
+How to get shape
+variable.shape
+example: a = [[1,2,3,4],[5,6,7,8]]
+a.shape
+=(2, 4)
+
+How to get type
+variable.dtype
+example: a = [[1,2,3,4],[5,6,7,8]]
+a.dtype
+=int 32
+
+How to get size
+variable.dsize
+example: a = [[1,2,3,4],[5,6,7,8]]
+a.dsize
+
+
+How to get total size
+variable.nbytes
+example: a = [[1,2,3,4],[5,6,7,8]]
+a.size *a.itemsize for a.nbytes
+=16
