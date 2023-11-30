@@ -1,0 +1,24 @@
+pip3 install Numpy
+
+
+Numpy is a core base for many other library like Pandas
+Numpy is a multi-dimensional array library, meaning it can store data in 1, 2 3... dimensional
+
+Why use Numpy over list? 
+-The main difference is speed. Numpy is much faster. A reason is it faster is because Numpy uses fixed types.
+-Numpy reads information in binary, while list uses a built in int type, which has multple meta information inside it.
+-With list having, size, reference count, object type, the complete binary makeup in a list is much larger than in Numpy
+-Since numpy uses less bytes, it reads faster 
+-Also in list, it is checking type each time while numpy does not do type check. 
+-Numpy uses contiguous memory, meaning data blocks is right next to each other. So quicker access to cache
+
+How are list different than Numpy?
+-List you can use insertion, deletion, appending, concaenation
+-numpym can also insertion, deletion, appending, concaenation, except it can it across the array
+
+Application of Numpy
+-Matlab replacement (math)
+- plotting (matplotlib)
+- backend (pandas, connect 4, digital photography)
+- Machine Learning
+

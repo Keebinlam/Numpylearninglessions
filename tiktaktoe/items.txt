@@ -1,6 +1,0 @@
-game board (3x3)
-"X"
-"O"
-when game will end
-user inputs
-game score counter
