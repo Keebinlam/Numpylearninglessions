@@ -51,3 +51,61 @@ variable.nbytes
 example: a = [[1,2,3,4],[5,6,7,8]]
 a.size *a.itemsize for a.nbytes
 =16
+
+How to access/change specific elemtsnts, rows, columns, etc
+Getting specific elements ['row', 'columns']
+example a = [[1,2,3,4,5,6,7],[8,9,10,11,12,13,14]] (2,7)
+a[1,5] = 13 #row count starts at 0, so the second row in this case is 1
+
+Getting a specific row
+a[0, :] = [1,2,3,4,5,6,7]
+
+Getting a specific columns
+a[:, 1] = [2,9]
+
+[Startindex:endindex,stepsize]
+a[0, 1:6:2] = [2,4,6]
+
+Changing elements
+a[1:5] = 20 #changing the 13 or position a[1:5] to 20
+a = [[1,2,3,4,5,6,7],[8,9,10,11,12,20,14]]
+
+Work outside in to get speific elements in larger arrays
+When replacing values in the array, make sure it formated in the same dimensions. ie changing a 2,7 array. if you want to change the whole second row, you will need 7 elements
+
+How to initialize different types of arrays
+-All 0s matrix
+np.zeros()
+example np.zeros(3,3) = [0,0,0]
+                        [0,0,0]
+                        [0,0,0]
+
+-All 1s ,matrix
+np.ones(2,3) = [1.1,1][1,1,1]
+You can also include datatypes 
+np.ones((2,3), dtype='int32')
+
+-For any other number initialization
+np.full(2,2), 'value'
+
+-reusing a previous matrix
+no.full_like('using a varible from before', 'value')
+
+-random decimal numbers
+np.random.rand('pass in shape' ie 2,4)
+
+-random interger values
+np.random.randint(10 'meaning 1-10', size=2,3))
+
+-the identity matrix
+np.identity(2) = 2 by 2
+np.identity(5) = 5 by 5 
+It is squared
+
+-repeating arrays and making sure it meets in the 0 axis
+arr = np.array([[1,2,3]])
+r1 = no.repeat(arr,3,axis 0) (repeat the arr array, 3 times, starting at the 0 position)
+[1,2,3]
+[1,2,3]
+[1,2,3]
+
