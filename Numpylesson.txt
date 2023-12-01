@@ -109,3 +109,41 @@ r1 = no.repeat(arr,3,axis 0) (repeat the arr array, 3 times, starting at the 0 p
 [1,2,3]
 [1,2,3]
 
+-how to remake this array
+[1,1,1,1,1]
+[1,0,0,0,1]
+[1,0,9,0,1]
+[1,0,0,0,1]
+[1,1,1,1,1]
+
+output = np.ones(5,5)
+[1,1,1,1,1]
+[1,1,1,1,1]
+[1,1,1,1,1]
+[1,1,1,1,1]
+[1,1,1,1,1]
+
+then make the inner ring 0
+
+output2 = np.zeros(3,3)
+[0,0,0]
+[0,0,0]
+[0,0,0]
+
+make the middle of the output2 array have a 9
+output2[1,1] = 9
+[0,0,0]
+[0,9,0]
+[0,0,0]
+
+change the the area where output 2 should be in, then filling it with output2
+output[1:-1,1:-1] = output2
+[1,1,1,1,1]
+[1,0,0,0,1]
+[1,0,9,0,1]
+[1,0,0,0,1]
+[1,1,1,1,1]
+
+user 'varible.copy to make a new copy of the same array
+
+Mathematics
