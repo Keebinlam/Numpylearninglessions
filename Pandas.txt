@@ -1,0 +1,57 @@
+Pandas is important for data science. 
+Why pandas? 
+Alot of stuff in pandas can be done in excel, but there are a few benefits
+1) Flexibility of Python, using the whole python langauage 
+2) Work with Big data
+
+#pip3 install pandas
+
+Loading data into Pandas
+1) df = pd.read('path to file) ** to have pandas to load file
+If the file is very large, its good to pull maybe the first few or last few, so when printing use df.head(x) or df.tail(x)
+x being the total number of rows you want to show
+
+To load in other files, like txt, or xlsx, use pf.read_(type)('path')
+
+Readining Data in Pandas
+Print(df.columns) To show all columns in file
+
+Reading a specific columns
+print(df['name of column"]) To show all the values within that column
+
+Readining each row
+print(df.ilok(1)) give you everything in the first row
+
+Readining a specific location
+Print(df.ilok[2,1])
+
+for index, row in df.intterows():
+    print (index, row)
+
+df.lok Finding specific data that is not interger based
+df.lok[df['type 1] == 'fire'] Here we are looking for records has a type 1 value of fire. Can use multiple conditions
+
+Sorting/Descibing Data
+df.descibe() ** to get a high level overview of the data (mean, standard deievation, count)
+df.sort_values('column name') ** this is sorting the values of a column by smallest to largest, or a-z Can make it asdening or desending
+Sorting columns like in excel
+
+Making Changes to the Data
+1)making a new columns 
+df['total'] = df[c1 +c2+ c3]
+This will make a new column named "total' and adds all the values from colums c1, c2, and c3
+
+To drop a column, use df.drop(column name)
+
+To move columns, make a new list, and change the order of columns listed 
+
+Saving our Data(Exporting to disired file)
+df.to_csv('name of new data frame')
+df.to_excel('name of new data frame')
+df.to_csv()'name of new data frame'), index=false, sep='\t'
+
+Filering Data
+df.lok[df['type 1;]== 'grass] ** only getting types that are grass
+sepeate conditions with parathensis. Can you & for and, | for or
+If you want to save the new filters values, you can set it to a new variable
+You can also save the new filter list by using listname.to_csv('filename')
