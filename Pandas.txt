@@ -55,3 +55,24 @@ df.lok[df['type 1;]== 'grass] ** only getting types that are grass
 sepeate conditions with parathensis. Can you & for and, | for or
 If you want to save the new filters values, you can set it to a new variable
 You can also save the new filter list by using listname.to_csv('filename')
+
+To reset index, meaning after filtering your list, it is not using the old index values to search
+Do listname.reset_index(drop=true) and set it to a new df
+
+To use "Contain" rather than equal
+df.lok[df['Name of column'].str.contains('Text you are looking for')]
+
+Use re, **regularexpression to find patterns in strings 
+
+To change conditions
+if this value is in this column, change the value to this new value
+df.lok[df['Type 1']== 'Fire', 'Type 1']= 'Flamer'
+
+Aggregate Statistics(groupby)
+df.groupby('type1}).mean() This is to group same values, and get the mean for each grouped value per column
+'Bug' type, mean of HP, mean of Att, mean of defense
+Mean, sum, count for Aggregate Statistics
+
+Working with large amounts of data
+Reading data in chunks (megabytes at a time)
+normally when using just read_csv, you can use read_csv('filename', chunksize=5): **Taking just the first 5 rows
