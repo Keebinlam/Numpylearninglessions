@@ -147,3 +147,73 @@ output[1:-1,1:-1] = output2
 user 'varible.copy to make a new copy of the same array
 
 Mathematics
+You can do arythematics on elements within an array
+example a = [1,2,3,4]
+a + 2 = [3,4,5,6]
+
+you can run math operations like you would in python
+
+np.matmul(a,b)
+multpltiplying the elements of row 1 and column 1
+
+Statistics
+using min, max, mode
+to add specific rows use 'axis 1' or 2... 
+
+Sum will add all the elements in the matrix
+
+reorganizing arrays
+before = np.array([[1,2,3,4][5,6,7,8]]) **(2,4)
+after = before.reshape(8,1)
+[[1]
+[2]
+[3]
+[4]
+[5]
+[6]
+[7]
+[8]]
+
+
+vertically stacking vectors
+a=(4,5,6)
+b=(1,2,3)
+np.vstack(a,b) = 
+[[4,5,6]
+[1,2,3]]
+
+can you make multiple copies of the same stack is by adding the array to the vstack, meaning it repeats
+
+works the same for hstack, but hotizontal orientation
+
+Miscellaneous
+Load Data from file, 
+np.genfromtxt('file name') delimiter = ",") 
+delimiter is what the values are seperated by
+.astype('int32) ** changes the varible to a new type 
+
+Advanced indexing
+Boolean masking and advanced indexing
+*where in file is value greater than for example 50?
+
+filedata = [1,2,51,3,52]
+filedata > 50 
+[false false, true, False, true]
+it will show in the specific location is true or false
+
+you can index in the same file, where the value is greater than 50
+filedata[filedata >50]
+array[51,52]
+it only grabs data when it is larger than 50 and puts in in the varible 
+
+You can index wth a list in numpy
+a = np.array[a,2,3,4,5,6,7,8,9,]
+a[[1,2,8]]
+array([2,3,9])
+
+can cut even further
+np.any(filedata >50, axis=0)
+**show me in the filedata array where the value is over 50, and it on the first 1 (axis = 0)
+
+use '&' to add parameters when looking for value like in regular python, like larger than 50, but small than 100 
+
