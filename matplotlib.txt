@@ -1,0 +1,46 @@
+Matplotlib is for everything data visualizations
+** Basic Graph
+plt(1,2,3),(2,4,6) (x,y)
+Moving arrays into variabled to make it easier
+plt.show() to show Graphs
+
+To add Title to graph: plt.title('title name)
+To add an X or Y lable: plt.xlable/ylable('lable name')
+
+plt.title('Title Name", fontdict={'fontname': 'Ariel', 'fontsize': 20})
+fontdict: You can change the styling of the text with fontdict, like size, fonts, and colors
+
+To get ticks to be only intergers
+plt.xticks (1,2,3,4,5)
+plt.yticks (1,2,3,4,5)
+Grapth will automattically resize when you change it ticks ranges.
+
+Adding a legend and changing the line: plt.legend 
+Make sure to add 'label' in the plt.plot(x,y, lable='line', color='red',linewidth=3, marker='.', markersize='11', markeredgecolor-'blue', linestyle='--')
+you can also use shorthand plot
+
+##resizing your graph
+plt.figure(figsize=(3,4, dpi = 300))
+
+##to save graph
+plt.savefig('graphname', dpi=300)
+
+##Barchart
+label = ['a', 'b', 'c'] Xaxis
+value = [1,4,2] Yaxis
+plt.bar(labels, values) **plt.bar(y,x)
+plt.show() to show barchart
+
+To change individual bars on the chart
+You will need to first set the plt.bar to a variable bar = plt.bar(y,x)
+bar[0].set_hatch('/') this is setting the first bar to have lines through it
+bar[1].set_hatch('0') this is setting the second bar to have circles through it
+bar[1].set_hatch('*') this is setting the third bar to have stars through it
+
+to set the patterns even more quickly, you can do a for loop
+
+pattern = ['/', '0', '*']
+for bar in bars:
+    bet.set_hatch(pattern.pop(0))
+
+    
