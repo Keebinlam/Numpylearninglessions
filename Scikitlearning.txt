@@ -1,0 +1,37 @@
+scikit is important for machine learning in python
+##classifying text to a category
+Scikit learning 
+Machine Learning Process
+1)what questions are we trying to answer?
+2) find data to help answer the question
+3) process data
+4) build model
+5) evaluate model
+6)tune data
+Scikit helps with all of this
+
+Scikit learning is more for traditional algortimic models 
+some neural network model
+
+Neural network is better with pytorch
+
+Scypy toolkit
+It has a ton of models to test
+
+Training split is for splitting data to Test or Training
+SVC is a type of ML algorthyim
+.score is to evaulate the data
+.predict is to predict the new data
+
+Typically it is used with matplitlib, pandas, and numpy
+
+Represenatation: hypothesis space where data preprocssing and model building is achieved
+Evaluation: It is esstentially how you jugde or prefer one model vs another 
+Optimazation: method of traversing the space to find the promised land of ideal models
+
+A learning proble consideres a set of n samples of data and then tries to predict properties of similar unknown data
+
+Supervised learning: classification, regression
+Unsupervised: clustering, Anomaly detection
+
+
