@@ -100,3 +100,42 @@ for i in fib:
 mygena = (i for i in range(10) if i % 2 == 0)
 for i in mygena:
     print(i)
+
+# parameters
+# the 'name' in the parathesis would be the parameter
+
+
+def printname(name):
+    print(name)
+
+
+# arguements
+# the 'kevin' in parathesis is the arguement, which is called in a function. "put kevin in the functions"
+printname('kevin')
+
+# kwargs
+
+# having default value for d, will print d no matter what, but is not requried in argurements
+
+
+def foo(a, b, c, d=99):
+    print(a, b, c, d)
+
+
+# here a 'key" is assigned to and linked to a parameter.
+foo(c=11, a=12, b=3)
+
+# in a function, if you add *args, or **kwargs, you can pass any number of argyemenbt or kwward arguments in the function
+
+
+def wosmd(a, b, *args, **kwargs):
+    print(a, b)  # print the parameters a and B
+    for arg in args:
+        print(args)  # will print as tuple
+    for key in kwargs:
+        print(key, kwargs[key])  # print as dictionary
+
+
+#it first prints the first 2 positiona agruements, then prints the tuple argument, then lastly the kwarg
+wosmd(1, 2, 11, 22, 33, three=2, seven=32)
+
