@@ -36,4 +36,4 @@ logger.error('this is an error')
 
 #this created a new file called "file.log" and shows the error in that log
 #rotating file handler
-#timing rotating handler
+#timing rotating handler.
