@@ -84,3 +84,47 @@ figure_region.show()
 
 fig_age_charge = px.scatter(acemedicaldf, x='age', y='charges')
 fig_age_charge.show()
+
+# now lets check on charges against bmi
+fig_bmi_charges = px.scatter(acemedicaldf, x='bmi', y='charges',
+                             color='smoker', hover_data=['sex'], title='bmi vs charge')
+# from what it looks like, the bmi is not a major factor of price increase, but here again, it shows smoking is a major indicator of cost
+fig_bmi_charges.update_traces(marker_size=5)
+# we do noticed a tick up at 30, if you are smoking
+fig_bmi_charges.show()
+
+# lets try some violin graphs. It has this unique attribue to visualize mass of similar counts for a variable
+px.violin(acemedicaldf, x='region', y='charges')
+# from this graph, it shows that there are a lot of people paying between 5k to 11k for all region
+
+sns.barplot(acemedicaldf, x='children', y='charges')
+
+# okay now we are going into correlation coeffiencnt, meaning the strength and direction of a relationship between 2 varible. The closer to 1, the stronger, the closer to 0, the weaker or no corrleation
+# keep in mind it does not work well outside of linear relationships, outliers effect it, and does not imply causeation
+# now we can compute correlation using pandas
+acemedicaldf.charges.corr(acemedicaldf.age)
+# here we are computing the correlation coeffeient of charges from the dataframe, to age, from the same data frame
+
+# we can check the corr for bmi as well
+acemedicaldf.charges.corr(acemedicaldf.bmi)
+# value returned is the correclation coaeffient
+
+# lets check the corrlation between age of a person and if the number of children
+acemedicaldf.age.corr(acemedicaldf.children)
+
+# now I want to check the smoker and the charges correlation, but smoker is in a "yes or no' format, we can change that
+smoker_values = {'no': 0, 'yes': 1}
+smoker_numeric = acemedicaldf.smoker.map(smoker_values)
+acemedicaldf.charges.corr(smoker_numeric)
+
+# this part was tricky because it didnt follow the same as the guide
+# but to prepare the .corr to run against all column, we first have to state to only gather columns with data type = number
+# from acemedicaldf, only select columns with numbers
+numeric_df = acemedicaldf.select_dtypes(include=['number'])
+# from all number columns is selected, THEN do the correlation coeffiecent against all number columns
+correlation_matrix = numeric_df.corr()
+print(correlation_matrix)
+
+# this is a heatmap from seasborn displaying the corrleation coeffiencent of all numberical columns in the acemedicaldf data frame
+sns.heatmap(correlation_matrix, cmap='Reds', annot=True)
+plt.title('Correlation Matrix')
