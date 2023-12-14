@@ -128,3 +128,70 @@ print(correlation_matrix)
 # this is a heatmap from seasborn displaying the corrleation coeffiencent of all numberical columns in the acemedicaldf data frame
 sns.heatmap(correlation_matrix, cmap='Reds', annot=True)
 plt.title('Correlation Matrix')
+
+#do not need to use a Linear regression Single Feature, or Loss/Cost Function, just use scikit learn
+#in geometri, y = mx +b. (m being the slope, and b being the interceptor: or the point that the slope starts at Y =0.
+#but in ML, m = w which means weigh, and b is bias. This is just a linear equation
+# We need a way to measure numerically how well the line fits the points.
+# Once the "measure of fit" has been computed, we need a way to modify w and b to improve the the fit.
+# If we can solve the above problems, it should be possible for a computer to determine w and b for the best fit line, starting from a random guess.
+
+non_smoker_df = acemedicaldf[acemedicaldf.smoker == 'no']
+def test(w, x, b):
+   return w * x + b
+
+x = non_smoker_df.age
+w = 100
+b = 200
+
+estimated_charges = test(w, x, b)
+
+plt.plot(x, estimated_charges, 'r-o');
+plt.xlabel('Age');
+plt.ylabel('Estimated Charges');
+
+target = non_smoker_df.charges
+
+plt.plot(x, estimated_charges, 'r', alpha=0.9);
+plt.scatter(x, target, s=8,alpha=0.8);
+plt.xlabel('Age');
+plt.ylabel('Charges')
+plt.legend(['Estimate', 'Actual']);
+
+x = non_smoker_df.age
+target = non_smoker_df.charges
+estimated_charges = test(w, x, b)
+
+#to summarize what just happen, I created a graph that plots the acme data, as well as a linear function (not actual linear line from correlation coeffiecnt
+#then created a function showing that takes in x and b paremeters, into a linear equation. The purpose of this is to plug in different numbers, and see how the line moves
+#the goal is to get the link to match as close to the general sloped line of the acme data
+#now we need to know how to measure how accurate our line is. This is important in ML because we can measure how close or not close we are 
+
+#root mean square error 
+def rmse(targets, predictions):
+    return np.sqrt(np.mean(np.square(targets - predictions)))
+
+predicted = test(x, w, b)
+
+rmse(target, predicted)
+
+def try_parameters(w, b):
+    ages = non_smoker_df.age
+    target = non_smoker_df.charges
+    predictions = test(x, w, b)
+    
+    plt.plot(x, predictions, 'r', alpha=0.9);
+    plt.scatter(x, target, s=8,alpha=0.8);
+    plt.xlabel('Age');
+    plt.ylabel('Charges')
+    plt.legend(['Prediction', 'Actual']);
+    
+    loss = rmse(target, predictions)
+    print("RMSE Loss: ", loss)
+
+    try_parameters(220, 50)
+
+    #in practice, I do not need to calculate a line, and measure the amount of residual of that line compared to the line of best. 
+#the linear equeation function is used to plot a line, but using Ordinary Least Squares and Stochastic gradient descent will help adjust the slope and intercept
+#rmse shows how far or close we are to the line of best fit
+#the Ordinary Least Squares and Stochastic gradient descent are used to reduce the value of RMSE, indicating the accuracy of the line plots
