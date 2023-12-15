@@ -1,16 +1,25 @@
 # because we are taking information from a url, using urlretrieval will allow us to pull a url
 # pandas to read the csv
 # numpy to calucuate data
+#because we are taking information from a url, using urlretrieval will allow us to pull a url 
+#pandas to read the csv
+#numpy to calucuate data 
 from urllib.request import urlretrieve
 import pandas as pd
 import numpy as np
-# to save data
+#to save data
 import jovian
-# to visualize the data
-import plotly.express as px
+#to visualize the data
+import plotly.express as px #used to interactive visualization
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
+#to use the linear regression/sgdr model from scikitlearn
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import SGDRegressor
+from sklearn import preprocessing #for vecoring columns "one hot"
+from sklearn.preprocessing import StandardScaler #making all the columns center to zero
+#this will make sure the notebook is not a pop up, and that charts will be an output. That way the information doesnt go away
 
 
 # start with getting the data from the url
@@ -405,3 +414,44 @@ loss = rmse(targets, prediction11)
 print('Loss:', loss)
 
 #one hot encoding
+enc = preprocessing.OneHotEncoder() #this new 'onehotencoder' takes the unique values from a column in the data
+enc.fit(acemedicaldf[['region']]) #here we are telling it to take the values from region
+enc.categories_ #here is the catgories after it has been processed
+one_hot = enc.transform(acemedicaldf[['region']]).toarray() #here are are vectorizing the column, and give its relationship a '1' and zeros for the rest amoung the new columns
+one_hot
+acemedicaldf[['northeast', 'northwest', 'southeast', 'southwest']] = one_hot
+
+acemedicaldf #now we can see the new columns. Where a record was previously just ' northeast' is now northeast = 1,
+# 'northwest', 'southeast', 'southwest' all = 0
+#lets run this through the linear model again but with the new data from regions
+inputsq, targetsq = acemedicaldf[['age', 'bmi', 'children','smoker_code', 'sex_code', 'northeast', 'northwest', 'southeast', 'southwest']], acemedicaldf['charges']
+modelq = LinearRegression().fit(inputsq, targetsq)
+predictionsq = modelq.predict(inputsq)
+loss = rmse(targetsq, predictionsq)
+print('Loss:', loss)
+modelq.coef_ #Remeber that using the coeffienct is the w or weight the equation in the linear regression (slope) and by using this .ceof, if we have multiple
+#features in the inputs (columns) we can actually get the weights for each. And in this case, we see 23848, which is the largest value. meaning the column "smoker" influences the charge the more
+modelq.intercept_ 
+#so since the ranges in the columns are so varies, like in charges going up super high, while region is just 0 or 1, to get a better reading. we should standardize them
+numeric_cols = ['age', 'bmi', 'children'] #we dont need to standardize smoker, or region because they are already zero to 1
+scaler = StandardScaler() #this computes the means and variance of the columns in the data frame
+scaler.fit(acemedicaldf[numeric_cols])
+scaler.mean_, scaler.var_
+scaled_inputs = scaler.transform(acemedicaldf[numeric_cols]) #now we are scaling the columns
+scaled_inputs
+cat_cols = ['smoker_code', 'sex_code', 'northeast', 'northwest', 'southeast', 'southwest']
+categorical_data = acemedicaldf[cat_cols].values
+inputs = np.concatenate((scaled_inputs, categorical_data), axis=1)
+targets = acemedicaldf.charges
+modelqq = LinearRegression().fit(inputs, targets)
+predictions = modelqq.predict(inputs)
+loss = rmse(targets, predictions)
+print('Loss:', loss)
+modelqq.coef_
+#a thing to note, if we have new data coming in, we have to remember to scale the data 
+# Explore the data and find correlations between inputs and targets
+# Pick the right model, loss functions and optimizer for the problem at hand, Scikitlearn handles all of this
+# Scale numeric variables and one-hot encode categorical data. Make sure to scale the data to have a mean of 0 and a standard deviation of 1
+# Set aside a test set (using a fraction of the training set)
+# Train the model
+# Make predictions on the test set and compute the loss
