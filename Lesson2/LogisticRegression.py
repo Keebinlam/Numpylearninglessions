@@ -12,8 +12,15 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 import joblib
 import jovian
+
+sns.set_style('darkgrid')
+matplotlib.rcParams['font.size'] = 14
+matplotlib.rcParams['figure.figsize'] = (10, 6)
+matplotlib.rcParams['figure.facecolor'] = '#00000000'
 
 dataset_url = 'https://www.kaggle.com/jsphyg/weather-dataset-rattle-package'
 od.download(dataset_url)
@@ -109,3 +116,63 @@ val_targets = val_df[target_col].copy()
 # apply inoputs and targets for test data
 test_inputs = test_df[inputs_cols].copy()
 test_targets = test_df[target_col].copy()
+
+# now lets adjust our dataframe to make sure if there is any category data like (direction: north, west) or (is smoke: yes, no) to numrecical data (north = 1, smoking equal = 0)
+# lets first seperate numrical values and catergorical values within the train inputs, because we know the training target df is just categorical column
+numeric_cols = train_inputs.select_dtypes(include=np.number).columns.tolist()
+categorical_cols = train_inputs.select_dtypes('object').columns.tolist()
+# lets take a look at the new columns
+train_inputs[numeric_cols].describe()
+train_inputs[categorical_cols].nunique()
+# now we can start processing the data, lets work out filling missing data
+# replacing missing value with the average value in the colum using the imputation
+imputer = SimpleImputer(strategy='mean')  # from scikitlearn
+
+# lets check for missing data in our big data frame
+# isna shows if a value is missing. the .sum is showing adding all the instances of n/a
+raw_df[numeric_cols].isna().sum()
+
+# we can do it again on the training input, but you can do it on all the sets
+train_inputs[numeric_cols].isna().sum()
+# SimpleImputer is going to look through all the columns in the data frame, its going to find the mean for each column.
+imputer.fit(raw_df[numeric_cols])
+# now we can see the calculation from the imputer
+# these are the mean for each column listed out
+list(imputer.statistics_)
+# now we need to fill this information in to the training, validation and test set
+# for this we will use 'transform'
+train_inputs[numeric_cols] = imputer.transform(train_inputs[numeric_cols])
+val_inputs[numeric_cols] = imputer.transform(val_inputs[numeric_cols])
+test_inputs[numeric_cols] = imputer.transform(test_inputs[numeric_cols])
+# we can check if the values na has been filled with the mean
+train_inputs[numeric_cols].isna().sum()
+# now lets scale our data to a smaller range (0-1) scale to zero
+# the reason why we need to do this is because data with a large range will tend to domintate the loss
+scaler = MinMaxScaler()
+# now we are fitting the scaling module to our data
+scaler.fit(raw_df[numeric_cols])
+# it is now scaled lets do it for our training, validiation, and test data
+# from out data that has been seperated to numerical value and data that has been filled with the mean where value is na, we can tranform the whole data with the scaler
+train_inputs[numeric_cols] = scaler.transform(train_inputs[numeric_cols])
+val_inputs[numeric_cols] = scaler.transform(val_inputs[numeric_cols])
+test_inputs[numeric_cols] = scaler.transform(test_inputs[numeric_cols])
+# here is the new data after scaling it
+train_inputs[numeric_cols]
+# we did a good job preparing the numerical data, lets work on categorical data
+# Lets encode catergorical data
+encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
+# we are using the one hot encoder from scikit learn, and telling it to ignore values that are blank
+encoder.fit(raw_df[categorical_cols])
+# using the encoder on the raw dataframe for categorical data
+encoder.categories_
+# the encoder has created a list of each categories for each of the catergorical columns in the data set
+# we can generate columns names for each individual catergory using  'get_feature_names_out '
+encoded_cols = list(encoder.get_feature_names_out(categorical_cols))
+print(encoded_cols)
+# now lets transform the inputs with the encoded catergorical columns
+train_inputs[encoded_cols] = encoder.transform(train_inputs[categorical_cols])
+val_inputs[encoded_cols] = encoder.transform(val_inputs[categorical_cols])
+test_inputs[encoded_cols] = encoder.transform(test_inputs[categorical_cols])
+pd.set_option('display.max_columns', None)
+# this is to uncap the limit of columns you can see. You can also download the df to a csv and check the columns
+train_inputs
