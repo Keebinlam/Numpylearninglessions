@@ -1,4 +1,5 @@
 # to download datasets from online sources like google and kaggle
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 import opendatasets as od
 import os
 import pandas as pd
@@ -274,3 +275,183 @@ new_input = {'Date': '2021-06-19',
 # 1) imputations of missing values using 'imputer' imputer = SimpleImputer(strategy = 'mean')
 # 2) Scale the data scaler = MinMaxScaler()
 # 3) encode the categories using the encoder encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
+# lets first make the new data into a dataframe
+new_input_df = pd.DataFrame([new_input])
+# now lets plug in out 3 steps
+new_input_df[numeric_cols] = imputer.transform(new_input_df[numeric_cols])
+new_input_df[numeric_cols] = scaler.transform(new_input_df[numeric_cols])
+new_input_df[encoded_cols] = encoder.transform(new_input_df[categorical_cols])
+X_new_input = new_input_df[numeric_cols + encoded_cols]
+X_new_input
+prediction = model.predict(X_new_input)[0]
+prediction
+prob = model.predict_proba(X_new_input)[0]
+# here is the function to help with new inputs
+
+
+# a function called predict input, that will give his a yes or now, and the chances of that yes or no
+def predict_input(single_input):
+    # when we get an input, turn it into a dataframe called 'input_df' so now all inputs will be called this when pushed through
+    input_df = pd.DataFrame([single_input])
+    # from the DF, fill in all none values with the mean for that column. The mean was calculated when we created the imputer.fit(raw_df[numeric_cols]) which is taking each column, from our original dataset, and getting te mean for all of them. Using transform, we will back into the DF
+    input_df[numeric_cols] = imputer.transform(input_df[numeric_cols])
+    # after all the empty fields are in, we need to scale the data to sum of 0, the scaler is taking all numerical columns from our original dataset, and uses the min-max scaling (min-max normalization) method on all the values in the data to 0 or 1
+    input_df[numeric_cols] = scaler.transform(input_df[numeric_cols])
+    # now to handle the categorical data, at this more input_df has data filled, and has been normalized to 0 to 1, We created an encorder, that takes all the unique object values and creates a new column for each. It's vectorized, meaning it will be given a 1 based of the orginal data, and 0 for the columns that it is not.
+    input_df[encoded_cols] = encoder.transform(input_df[categorical_cols])
+    # we put together the new columns, and data pre processing into one nice varible
+    X_input = input_df[numeric_cols + encoded_cols]
+    # we run the model prediction by fitting the into scikit learn
+    pred = model.predict(X_input)[0]
+    # do the same to get a probablilty
+    prob = model.predict_proba(X_input)[0][list(model.classes_).index(pred)]
+    return pred, prob  # display the new input
+
+
+# inside of 'model' contains this "train_inputs[numeric_cols + encoded_cols], train_targets)"
+# which is our complete ML model using the training data that was given to us to use to make this model.
+new_input2 = {'Date': '2021-06-19',
+              'Location': 'Launceston',
+              'MinTemp': 23.2,
+              'MaxTemp': 33.2,
+              'Rainfall': 10.2,
+              'Evaporation': 4.2,
+              'Sunshine': np.nan,
+              'WindGustDir': 'NNW',
+              'WindGustSpeed': 52.0,
+              'WindDir9am': 'NW',
+              'WindDir3pm': 'NNE',
+              'WindSpeed9am': 13.0,
+              'WindSpeed3pm': 20.0,
+              'Humidity9am': 89.0,
+              'Humidity3pm': 58.0,
+              'Pressure9am': 1004.8,
+              'Pressure3pm': 1001.5,
+              'Cloud9am': 8.0,
+              'Cloud3pm': 5.0,
+              'Temp9am': 25.7,
+              'Temp3pm': 33.0,
+              'RainToday': 'Yes'}
+predict_input(new_input2)
+input_cols = list(train_df.columns)[1:-1]
+target_col
+# you assume a certain relationship between the inputs, and the output. This is called the model. The model has inherent parameter called weights which are intially randomized.
+# then you train the model which means you make prediction and compare them with actual data. This is where you need labeled data
+# then from the comparision, you compute the loss, and you reduce the loss using an optimation technique
+# then you can use is after logiciall evaulting it
+# Saving the model, lets first creat a dictionary containing all the required objects
+# this is so we can send the model to a developer so that they can make it into whatever it needs to be
+# They do not need to run the model, but will use the coeffiecnt, the intercept, sigmoid to work as a standalone application
+# Giving them that, is almost like giving them a dense representation of all the intelligence that is present in the model
+
+aussie_rain = {
+    'model': model,
+    'imputer': imputer,
+    'scaler': scaler,
+    'encoder': encoder,
+    'input_cols': input_cols,
+    'target_col': target_col,
+    'numeric_cols': numeric_cols,
+    'categorical_cols': categorical_cols,
+    'encoded_cols': encoded_cols
+}
+# we are taking all the backend data and functions hidden in these keys,and transfering them
+# the model intellignce is dirived from the weights
+
+___________________________
+
+# Download the dataset
+od.download('https://www.kaggle.com/jsphyg/weather-dataset-rattle-package')
+raw_df = pd.read_csv('weather-dataset-rattle-package/weatherAUS.csv')
+raw_df.dropna(subset=['RainToday', 'RainTomorrow'], inplace=True)
+
+# Create training, validation and test sets
+year = pd.to_datetime(raw_df.Date).dt.year
+train_df, val_df, test_df = raw_df[year <
+                                   2015], raw_df[year == 2015], raw_df[year > 2015]
+
+# Create inputs and targets
+input_cols = list(train_df.columns)[1:-1]
+target_col = 'RainTomorrow'
+train_inputs, train_targets = train_df[input_cols].copy(
+), train_df[target_col].copy()
+val_inputs, val_targets = val_df[input_cols].copy(), val_df[target_col].copy()
+test_inputs, test_targets = test_df[input_cols].copy(
+), test_df[target_col].copy()
+
+# Identify numeric and categorical columns
+numeric_cols = train_inputs.select_dtypes(
+    include=np.number).columns.tolist()[:-1]
+categorical_cols = train_inputs.select_dtypes('object').columns.tolist()
+
+# Impute missing numerical values
+imputer = SimpleImputer(strategy='mean').fit(raw_df[numeric_cols])
+train_inputs[numeric_cols] = imputer.transform(train_inputs[numeric_cols])
+val_inputs[numeric_cols] = imputer.transform(val_inputs[numeric_cols])
+test_inputs[numeric_cols] = imputer.transform(test_inputs[numeric_cols])
+
+# Scale numeric features
+scaler = MinMaxScaler().fit(raw_df[numeric_cols])
+train_inputs[numeric_cols] = scaler.transform(train_inputs[numeric_cols])
+val_inputs[numeric_cols] = scaler.transform(val_inputs[numeric_cols])
+test_inputs[numeric_cols] = scaler.transform(test_inputs[numeric_cols])
+
+# One-hot encode categorical features
+encoder = OneHotEncoder(sparse=False, handle_unknown='ignore').fit(
+    raw_df[categorical_cols])
+encoded_cols = list(encoder.get_feature_names_out(categorical_cols))
+train_inputs[encoded_cols] = encoder.transform(train_inputs[categorical_cols])
+val_inputs[encoded_cols] = encoder.transform(val_inputs[categorical_cols])
+test_inputs[encoded_cols] = encoder.transform(test_inputs[categorical_cols])
+
+# Save processed data to disk
+train_inputs.to_parquet('train_inputs.parquet')
+val_inputs.to_parquet('val_inputs.parquet')
+test_inputs.to_parquet('test_inputs.parquet')
+pd.DataFrame(train_targets).to_parquet('train_targets.parquet')
+pd.DataFrame(val_targets).to_parquet('val_targets.parquet')
+pd.DataFrame(test_targets).to_parquet('test_targets.parquet')
+
+# Load processed data from disk
+train_inputs = pd.read_parquet('train_inputs.parquet')
+val_inputs = pd.read_parquet('val_inputs.parquet')
+test_inputs = pd.read_parquet('test_inputs.parquet')
+train_targets = pd.read_parquet('train_targets.parquet')[target_col]
+val_targets = pd.read_parquet('val_targets.parquet')[target_col]
+test_targets = pd.read_parquet('test_targets.parquet')[target_col]
+
+_____________
+
+# Select the columns to be used for training/prediction
+X_train = train_inputs[numeric_cols + encoded_cols]
+X_val = val_inputs[numeric_cols + encoded_cols]
+X_test = test_inputs[numeric_cols + encoded_cols]
+
+# Create and train the model
+model = LogisticRegression(solver='liblinear')
+model.fit(X_train, train_targets)
+
+# Generate predictions and probabilities
+train_preds = model.predict(X_train)
+train_probs = model.predict_proba(X_train)
+accuracy_score(train_targets, train_preds)
+
+# Helper function to predict, compute accuracy & plot confustion matrix
+
+
+def predict_and_plot(inputs, targets, name=''):
+    preds = model.predict(inputs)
+    accuracy = accuracy_score(targets, preds)
+    print("Accuracy: {:.2f}%".format(accuracy * 100))
+    cf = confusion_matrix(targets, preds, normalize='true')
+    plt.figure()
+    sns.heatmap(cf, annot=True)
+    plt.xlabel('Prediction')
+    plt.ylabel('Target')
+    plt.title('{} Confusion Matrix'.format(name))
+    return preds
+
+
+# Evaluate on validation and test set
+val_preds = predict_and_plot(X_val, val_targets, 'Validation')
+test_preds = predict_and_plot(X_test, test_targets, 'Test')
