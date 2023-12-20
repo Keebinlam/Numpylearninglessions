@@ -176,3 +176,101 @@ test_inputs[encoded_cols] = encoder.transform(test_inputs[categorical_cols])
 pd.set_option('display.max_columns', None)
 # this is to uncap the limit of columns you can see. You can also download the df to a csv and check the columns
 train_inputs
+
+# finally after all that, we are ready to train the logistic regression model
+model = LogisticRegression(solver='liblinear')
+
+model.fit(train_inputs[numeric_cols + encoded_cols], train_targets)
+print(numeric_cols + encoded_cols)
+# scikit learn can have targets as categorical data, but inputs must be numerical
+print(model.coef_.tolist())
+print(model.intercept_)
+# you can interpret the data at this point based on the weights. Like (maxtemp = -2.879 coef) which means the higher the temp, the less likely it will rain
+# or (windguspeed: 6.7644) showing that the more windy it is, the more likely it will rain tomorrow.p
+dasd = pd.DataFrame({
+    'feature': (numeric_cols + encoded_cols),
+    'weight': model.coef_.tolist()[0]
+})
+# making prediction and evaluating the model
+# we created these variables since were using [numeric_cols + encoded_cols] columns a lot, this will help organize when we use each of the models for predictions
+x_train = train_inputs[numeric_cols + encoded_cols]
+x_val = val_inputs[numeric_cols + encoded_cols]
+x_test = test_inputs[numeric_cols + encoded_cols]
+# here is the predict function for the train data
+train_pred = model.predict(x_train)
+# this what how model predicts the value to be (Based off training data)
+train_pred,
+# this is what the actual results from that data (Based off training data)
+train_targets
+# now we need to check for accuracy, by comparing the results of the pred and targer data
+# for this we can use 'accuracy_score' by scikit learn (plug in target first, then prediction)
+accuracy_score(train_targets, train_pred)
+# it has a 85 percent accuracy!
+# but for logistic regression, we can get the probablity, which are yes and no's
+train_probs = model.predict_proba(x_train)
+train_probs  # its the probablity of it being a no or a yes
+# we can visualize the the accurate by using the confusion matrix to breakdown correct and incorrect inouts aginast the actual and predicted
+confusion_matrix(train_targets, train_pred, normalize='true')
+
+# TN, FP
+# FN, TP
+
+# depending on the problem, its better to optimize for FN or FP, than total accuracy of the model
+# the breakdown, 94 percent of the time, when is it not going to rain, the modeal guess it right, and only 5 percent of the time does it get it wrong
+# however, in 47 percent of the time when it is raining, the model get it wrong and said its not raining. So not good
+
+
+def predict_and_plot(inputs, targets, name=''):
+    preds = model.predict(inputs)
+
+    accuracy = accuracy_score(targets, preds)
+    print("Accuracy: {:.2f}%".format(accuracy * 100))
+
+    cf = confusion_matrix(targets, preds, normalize='true')
+    plt.figure()
+    sns.heatmap(cf, annot=True)
+    plt.xlabel('Prediction')
+    plt.ylabel('Target')
+    plt.title('{} Confusion Matrix'.format(name))
+
+    return preds
+
+
+train_preds = predict_and_plot(x_train, train_targets, 'Training')
+
+val_pred = model.predict(x_val)
+val_pred
+accuracy_score(val_targets, val_pred)
+test_pred = model.predict(x_test)
+test_pred
+accuracy_score(test_targets, test_pred)
+# what we know now is that since the validation data, and the test data are so close to the accuracy of the training data, we say the training is 84 percent accurate
+# now you want to test the accurate against other dumb models. Like have a model with just 'no' will it be better when we just say no for rain everyday?
+# or try against a human, have a meteorlist go through the data, and for 100 days, guess if it will rain tomorrow. if they score less than the model, we can saw that the AI we built is better than a human
+# now lets make a new input prediction
+new_input = {'Date': '2021-06-19',
+             'Location': 'Katherine',
+             'MinTemp': 23.2,
+             'MaxTemp': 33.2,
+             'Rainfall': 10.2,
+             'Evaporation': 4.2,
+             'Sunshine': np.nan,
+             'WindGustDir': 'NNW',
+             'WindGustSpeed': 52.0,
+             'WindDir9am': 'NW',
+             'WindDir3pm': 'NNE',
+             'WindSpeed9am': 13.0,
+             'WindSpeed3pm': 20.0,
+             'Humidity9am': 89.0,
+             'Humidity3pm': 58.0,
+             'Pressure9am': 1004.8,
+             'Pressure3pm': 1001.5,
+             'Cloud9am': 8.0,
+             'Cloud3pm': 5.0,
+             'Temp9am': 25.7,
+             'Temp3pm': 33.0,
+             'RainToday': 'Yes'}
+# now we have to apply the pre-processing steps for our data, to the new inputs
+# 1) imputations of missing values using 'imputer' imputer = SimpleImputer(strategy = 'mean')
+# 2) Scale the data scaler = MinMaxScaler()
+# 3) encode the categories using the encoder encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
