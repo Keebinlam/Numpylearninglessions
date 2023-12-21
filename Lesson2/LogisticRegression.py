@@ -361,36 +361,51 @@ aussie_rain = {
 ___________________________
 
 # Download the dataset
+# This is using the open dataset module. To download dataset from google and kaggle
 od.download('https://www.kaggle.com/jsphyg/weather-dataset-rattle-package')
+# after downloadeding the data, we use panda to read the file and put it into a varible
 raw_df = pd.read_csv('weather-dataset-rattle-package/weatherAUS.csv')
+# Since we are determining the the target as 'rain tomorrow' we drop this column so the ML model is not trained on it
 raw_df.dropna(subset=['RainToday', 'RainTomorrow'], inplace=True)
 
 # Create training, validation and test sets
+# We start to segment our data, break them apart by year to prepare the training, test and validation data set
 year = pd.to_datetime(raw_df.Date).dt.year
 train_df, val_df, test_df = raw_df[year <
+                                   # train data is 2015 and news, valudation is just 2015, and our test data is anything older than 2015
                                    2015], raw_df[year == 2015], raw_df[year > 2015]
 
 # Create inputs and targets
+# now that we data has been split, we can focus on just the training data and apply it to the rest later. Here we are setting up the columns that the models will be trained on. We exclude the date, and the rain tomorrow from our input
 input_cols = list(train_df.columns)[1:-1]
+# how target column is the column we want out ML to predict, so we signify it by putting it in a varible we can call
 target_col = 'RainTomorrow'
 train_inputs, train_targets = train_df[input_cols].copy(
+    # here taking the assigned columns varibles, and applying them to our training data. Letting out system know, 'training input = from training data, apply just the input columns that i listed', we do the same for target column in the training data
 ), train_df[target_col].copy()
+# we apply the column list for input and targets to our validation dataset
 val_inputs, val_targets = val_df[input_cols].copy(), val_df[target_col].copy()
-test_inputs, test_targets = test_df[input_cols].copy(
+test_inputs, test_targets = test_df[input_cols].copy(  # and lastly the test set
 ), test_df[target_col].copy()
 
 # Identify numeric and categorical columns
-numeric_cols = train_inputs.select_dtypes(
+numeric_cols = train_inputs.select_dtypes(  # now within out inputs, we have a mix of numbers and strings. Well need to sepearate those for the mode to work.
+    # we first say; from the training input data set, we want only the numbers in this variables
     include=np.number).columns.tolist()[:-1]
+# from the training data set for inputs, grab all the catergories
 categorical_cols = train_inputs.select_dtypes('object').columns.tolist()
 
 # Impute missing numerical values
+# we are now taking the original data source, and getting the mean for each column.
 imputer = SimpleImputer(strategy='mean').fit(raw_df[numeric_cols])
+# inside the training data for inputs, for valye inside the number columns, if anythings is missing, please fill that data with the mean
 train_inputs[numeric_cols] = imputer.transform(train_inputs[numeric_cols])
+# we do the same for the validation and test set
 val_inputs[numeric_cols] = imputer.transform(val_inputs[numeric_cols])
 test_inputs[numeric_cols] = imputer.transform(test_inputs[numeric_cols])
 
 # Scale numeric features
+# now we scale the data to range 0 and 1 to nornalize our data
 scaler = MinMaxScaler().fit(raw_df[numeric_cols])
 train_inputs[numeric_cols] = scaler.transform(train_inputs[numeric_cols])
 val_inputs[numeric_cols] = scaler.transform(val_inputs[numeric_cols])
@@ -398,42 +413,38 @@ test_inputs[numeric_cols] = scaler.transform(test_inputs[numeric_cols])
 
 # One-hot encode categorical features
 encoder = OneHotEncoder(sparse=False, handle_unknown='ignore').fit(
+    # for this part, we are making an a new column for every unique value from the object column. We then vectorize it, indicating 1 as itself, and a 0 for where it is not.
     raw_df[categorical_cols])
 encoded_cols = list(encoder.get_feature_names_out(categorical_cols))
+# we have to apply this tot he training set within the catergory columns varibles
 train_inputs[encoded_cols] = encoder.transform(train_inputs[categorical_cols])
+# we have to apply this tot he training set within the validation columns varibles
 val_inputs[encoded_cols] = encoder.transform(val_inputs[categorical_cols])
+# we have to apply this tot he training set within the test columns varibles
 test_inputs[encoded_cols] = encoder.transform(test_inputs[categorical_cols])
-
-# Save processed data to disk
-train_inputs.to_parquet('train_inputs.parquet')
-val_inputs.to_parquet('val_inputs.parquet')
-test_inputs.to_parquet('test_inputs.parquet')
-pd.DataFrame(train_targets).to_parquet('train_targets.parquet')
-pd.DataFrame(val_targets).to_parquet('val_targets.parquet')
-pd.DataFrame(test_targets).to_parquet('test_targets.parquet')
-
-# Load processed data from disk
-train_inputs = pd.read_parquet('train_inputs.parquet')
-val_inputs = pd.read_parquet('val_inputs.parquet')
-test_inputs = pd.read_parquet('test_inputs.parquet')
-train_targets = pd.read_parquet('train_targets.parquet')[target_col]
-val_targets = pd.read_parquet('val_targets.parquet')[target_col]
-test_targets = pd.read_parquet('test_targets.parquet')[target_col]
 
 _____________
 
 # Select the columns to be used for training/prediction
+# here we finally filled in all the data that are missing in the number columns, and scaled them to 0-1, and combine them with the new category columns that has been vectorizes
 X_train = train_inputs[numeric_cols + encoded_cols]
+# since all the columns and preprocessing steps has been done, we can apply these steps to our vallidation data to get a full validation input
 X_val = val_inputs[numeric_cols + encoded_cols]
+# and now we have a full test input with all the pre processing
 X_test = test_inputs[numeric_cols + encoded_cols]
 
 # Create and train the model
+# we call in a varible that houses our model. The model will take our inputs and targets for each dataset. Run the math behind it, and optimize it automatcally. It will then hold that functionalyty in the 'model' subvalue
 model = LogisticRegression(solver='liblinear')
+# we input our preprocessed inputs from our training data set, and the target set that we plucked for the begining since it does not need to be preprocessed. into the model.
 model.fit(X_train, train_targets)
 
 # Generate predictions and probabilities
+# The model is now done, and houses stuff like the coeffiecnt(weight), the intercept (bias) for each column in our training data. But we create a new varible that hold the prediction function for the model.
 train_preds = model.predict(X_train)
+# this line of code is using the model to make predictions on the X_train dataset, and then storing those predictions in the train_preds variable.
 train_probs = model.predict_proba(X_train)
+# From the data and the model it holds. it is making a prediction be on out original training data, and predicting if it will rain or not. We can compare the actual data we have, to what it guessed per row and see how often it is right and wrong
 accuracy_score(train_targets, train_preds)
 
 # Helper function to predict, compute accuracy & plot confustion matrix
@@ -451,7 +462,29 @@ def predict_and_plot(inputs, targets, name=''):
     plt.title('{} Confusion Matrix'.format(name))
     return preds
 
+# Here is a function that handled everything, taking all the steps we made and putting it into a function that we can apply on new data
+
+
+def predict_input(single_input):
+    # when we get an input, turn it into a dataframe called 'input_df' so now all inputs will be called this when pushed through
+    input_df = pd.DataFrame([single_input])
+    # from the DF, fill in all none values with the mean for that column. The mean was calculated when we created the imputer.fit(raw_df[numeric_cols]) which is taking each column, from our original dataset, and getting te mean for all of them. Using transform, we will back into the DF
+    input_df[numeric_cols] = imputer.transform(input_df[numeric_cols])
+    # after all the empty fields are in, we need to scale the data to sum of 0, the scaler is taking all numerical columns from our original dataset, and uses the min-max scaling (min-max normalization) method on all the values in the data to 0 or 1
+    input_df[numeric_cols] = scaler.transform(input_df[numeric_cols])
+    # now to handle the categorical data, at this more input_df has data filled, and has been normalized to 0 to 1, We created an encorder, that takes all the unique object values and creates a new column for each. It's vectorized, meaning it will be given a 1 based of the orginal data, and 0 for the columns that it is not.
+    input_df[encoded_cols] = encoder.transform(input_df[categorical_cols])
+    # we put together the new columns, and data pre processing into one nice varible
+    X_input = input_df[numeric_cols + encoded_cols]
+    # we run the model prediction by fitting the into scikit learn
+    pred = model.predict(X_input)[0]
+    # do the same to get a probablilty
+    prob = model.predict_proba(X_input)[0][list(model.classes_).index(pred)]
+    return pred, prob  # display the new input
+
 
 # Evaluate on validation and test set
 val_preds = predict_and_plot(X_val, val_targets, 'Validation')
 test_preds = predict_and_plot(X_test, test_targets, 'Test')
+
+# lastly, we would run the through all of it again for the validation and test set to see how close we are and to check if our model is incorrect.
