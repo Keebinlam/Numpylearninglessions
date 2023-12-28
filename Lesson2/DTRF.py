@@ -9,6 +9,17 @@ import matplotlib
 import os
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler
+# all the imports set up
+import jovian
+import pandas as pd
+import numpy as np
+import opendatasets as od
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib
+import os
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
@@ -100,3 +111,51 @@ X_train = train_inputs[numeric_cols + encoded_cols]
 X_val = val_inputs[numeric_cols + encoded_cols]
 X_test = test_inputs[numeric_cols + encoded_cols]
 # decision tree in general is a parlance represents a hieractical series of binary decisions
+
+# decision tree in general is a parlance represents a hieractical series of binary decisions
+# it works then same, except we let the computer configure the optimal structure and hierarcgy instead of manual criteria
+# root nodes are columns, leaf nodes are the last columns in the decision tree, root nodes leading to another node is a branch
+# The tree is just the pattern from datas algorythm
+# root node are determined by the gini index or information gain.
+# know gini index and impurity and entropy with the information gain
+# this the decision tree model we will be using, the 42 is crazy, its just a common nominclcher to use 42 because of hitch hikers guide to the galasy, we are able to replicate the 42 'seed'that way
+model = DecisionTreeClassifier(random_state=42)
+pd.value_counts(train_targets)
+# the optimal decision tree has been created fronm the training data
+model.fit(X_train, train_targets)
+# it knows yes or no value because we fit the target in the model.
+# we are fitting the model to give us a predictions
+train_pred = model.predict(X_train)
+pd.value_counts(train_pred)
+# we are comparing the actual target values, with the values from the models predictions
+accuracy_score(train_pred, train_targets)
+# what we are seeing is the model is almost 100 percent accurate when predicting if it will rain or not with our training model
+# To see how confident our mode is with deciding each input
+train_prob = model.predict_proba(X_train)
+train_prob
+# Since its picking from 0-1, 1 being super confident yes and 0 being absolute no, our model is saying it is super sure one value or another
+# we should probably check the data from our validation data to make sure 100 percent is correct
+model.score(X_val, val_targets)
+val_targets.value_counts()/len(val_targets)
+# when we hear regularzation, it means we are trying to correct overfitting
+# we can check the parameters. First is the criteria, with either gini or entory, which measures the loss
+# max_depth, to reduce the total depth in the tree
+# default criterion is gini
+# and max_leaf_node
+model1 = RandomForestClassifier()
+model1.fit(X_train, train_targets)
+train_pred1 = model1.predict(X_train)
+# unlike the decision tree, it is scoring higher with the validation data.
+model1.score(X_val, val_targets)
+# lets visualize the tree
+plt.figure(figsize=(80, 20))
+plot_tree(model, feature_names=X_train.columns, max_depth=2, filled=True)
+# here is to find out the importance of each feature
+X_train.columns
+model.feature_importances_
+# lets make it into a dataframe so we can see it better
+importance_df = pd.DataFrame({'feature': X_train.columns, 'importance': model.feature_importances_}).sort_values(
+    'importance', ascending=False)
+importance_df.head(10)
+plt.title('Feature Importance')
+sns.barplot(data=importance_df.head(10), x='importance', y='feature')
