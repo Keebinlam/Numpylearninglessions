@@ -199,3 +199,4 @@ new_input = {'Date': '2021-06-19',
              'Temp3pm': 33.0,
              'RainToday': 'Yes'}
 predict_input(model1, new_input)
+#
